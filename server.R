@@ -1,52 +1,77 @@
-#
-# This is the server logic of a Shiny web application. You can run the 
-# application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
 
 library(shiny)
 library(tidyverse)
 library(GGally)
 
-# data set only read in once
-Data <- read_csv("insurance2.csv")
-Data$sex <- as.factor(Data$sex)
-Data$region <- as.factor(Data$region)
-Data$smoker <- as.factor(Data$smoker)
-Data$insuranceclaim <- as.factor(Data$insuranceclaim)
 
+# Read Data
+Data <- read_csv("insurance.csv")
+Data$sex <- as.factor(Data$sex)
+Data$smoker <- as.factor(Data$smoker)
+Data$region <- as.factor(Data$region)
+
+# Add ln(charges) 
 Data <- Data%>%mutate(lnCharges=log(charges + 1))
 
-# Define server logic required to draw a histogram
+
+
+# ShinyServer
 shinyServer(function(input, output, session) {
   
-  # create plot
-  g <- ggplot(Data, aes(x=bmi, y=lnCharges))
+  getData <- reactive({
+    
+    newData <- Data %>% filter(sex == input$sex, region == input$region)
+ 
+     })
   
-  g + geom_point(size=3, aes(col=steps))
-   
+  
+  #create plot
+  output$Plot <- renderPlot({
+    
+    #get filtered data
+    newData <- getData()
+    
+    #create plot
+    g <- ggplot(newData, aes(x=age, y=lnCharges))
+    
+    if(input$smoke&input$steps){
+      g + geom_point(size=3, aes(col=steps))+facet_wrap(~smoker)
+    } else if(input$smoke) {
+      g + geom_point(size=3)+facet_wrap(~smoker, labeller = label_both)
+    } else {
+      g + geom_point(size = input$size)
+    }
+  })
+  
+  
+  
+  # update the sliderInput
+  observe({
+    if(input$steps){
+      updateSliderInput(session, "size", min=3)
+    } else {
+      updateSliderInput(session, "size", min=1)
+    }
+  })
+  
+  
+  #create text info
+  output$info <- renderText({
+    #get filtered data
+    newData <- getData()
+    
+    paste("The average individual medical costs billed by health insurance for", input$sex, " ", "in", " ", input$region," ", "is", round(mean(newData$charges, na.rm = TRUE), 2), sep = " ")
+  })
+  
+  #create output of observations    
+  output$table <- renderTable({
+    getData()
 
-   ggpairs(Data)
-   hist(log(Data$charges))
-   
-   fit <- lm(lnCharges ~ age*bmi*smoker*steps, data=Data); summary(fit)
-   
-   
-   
-   
-   
-  output$distPlot <- renderPlot({
-    
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2] 
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')
-    
+  })
+  
+  # update the title using renderUI() and uiOutput()
+  output$title <- renderUI({
+    h1(paste0("Analysis", " ",  "of Insurance Cost Data", " ", "for", " ", toupper(substring(input$sex,1,1)),substring(input$sex,2)," ", "in"," ", toupper(substring(input$region,1,1)),substring(input$region,2)))
   })
   
 })

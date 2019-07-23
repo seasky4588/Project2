@@ -1,33 +1,70 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-# 
-#    http://shiny.rstudio.com/
-#
 
 library(shiny)
+library(ggplot2)
+library(shinydashboard)
 
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
+
+dashboardPage(skin="yellow",
+  # add title
+  dashboardHeader(title ="Project3", titleWidth = 750),
   
-  # Application title
-  titlePanel("Old Faithful Geyser Data"),
+  # define sidebar items
+  dashboardSidebar(sidebarMenu(
+    menuItem("About", tabName ="about", icon= icon("archive")),
+    menuItem("Application", tabName="app", icon= icon("laptop"))
+  )),
   
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
-       sliderInput("bins",
-                   "Number of bins:",
-                   min = 1,
-                   max = 50,
-                   value = 30)
-    ),
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-       plotOutput("distPlot")
-    )
-  )
-))
+  # define the body of the app
+  dashboardBody(
+    tabItems(
+      # First tab content
+      tabItem(tabName= "about",
+        fluidRow(
+        )),
+      tabItem(tabName= "app",
+        fluidRow(
+          column(3,
+                box(width=12, title="Select sex and region of policyholder",
+                    selectizeInput("sex", "Sex", selected = "female", choices = levels(as.factor(Data$sex))),
+                    selectizeInput("region", "Residential area of policyholder", 
+                                   selected = "southeast", choices = levels(as.factor(Data$region)))
+                    ),
+                sliderInput("size", "Size of Points on Graph",
+                            min = 1, max = 10, value = 5, step = 1),
+                br(),
+                checkboxInput("smoke", h4("Seperate Smoking status", style = "color:blue;")), 
+                
+                # conditionalPanel 
+                conditionalPanel(condition="input.smoke",
+                                 checkboxInput("steps", h4("Color Code averaging walking steps per day", 
+                                                           style = "color:red;")))
+                  
+                ),
+           column(9, 
+                  tabsetPanel(
+                    tabPanel("data exploration",
+                        fluidRow(
+                            column(12,
+                                  plotOutput("Plot"),
+                                  br(),
+                                  textOutput("info"))
+                             )), # end tab panel
+                    tabPanel("clustering", 
+                        fluidRow()), # end tab panel
+                    tabPanel("Modeling",
+                        fluidRow()), # end tab panel
+                    tabPanel("Data",
+                        fluidRow(
+                           column(12,
+                                  tableOutput("table"))
+                        )) # end tab panel
+                    
+                  ) # end tabset Panel
+                ) # end column
+              ) # end fluidRow
+            ) # end tabItem    
+          ) # end tabItems
+      
+      ) # end DashboardBody
+    ) # end Dashborad Page
+  
