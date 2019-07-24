@@ -11,7 +11,10 @@ dashboardPage(skin="blue",
   # define sidebar items
   dashboardSidebar(sidebarMenu(
     menuItem("About", tabName ="about", icon= icon("comment-dots")),
-    menuItem("Application", tabName="app", icon= icon("chart-bar"))
+    menuItem("Data Exploration", tabName="Start", icon= icon("laptop")),
+    menuItem("Unsupervised Learning", tabName="Clustering", icon= icon("brain")),
+    menuItem("Supervised Learning", tabName="Modeling", icon= icon("chart-bar")),
+    menuItem("Data", tabName="Data", icon= icon("book"))
   )),
   
   # define the body of the app
@@ -25,44 +28,61 @@ dashboardPage(skin="blue",
           
           # two columns for each of the two items
           column(6,
-                h1("What does this app do?"),
+                h1("About the Data"),
                 # box to contain description
                 box(background = "purple", width=12,
-                    h4("This application visulalizes some analyses with health dataset"),
-                    h4("There are two types of statistical methods, unsupervised and supervised method."),
-                    h4("Unsupervised model is ~~"),
-                    h4("Supervised moedel is ~~")
+                    h4("This data is a sample dataset of Medical Cost Personal in US."),
+                    h4("It includes nine informations which are age, sex, bmi, steps, childeren, smoker, region and charges,"),
+                    h4("The intersted value is charges(reponse, y), individual medical costs billed by health insurance."),
+                    h4("The purpose is making a prediction model with related variables."),
+                    br(),
+                    h4("[ Variables information ]"),
+                    h5("- age : age of policyholder"),
+                    h5("- sex: gender of policy holder"), 
+                    h5("- bmi: Body mass index (kg / m^2)"),
+                    h5("- steps: average walking steps per day of policyholder"), 
+                    h5("- children: number of children/dependents of policyholder"),
+                    h5("- smoker: smoking state of policyholder (non-smoker=no, smoker=yes)"), 
+                    h5("- region: the residential area of policyholder in the US"),
+                    h5("- charges: individual medical costs billed by health insurance")
+                        
                     ) # end box
                  ), # end column
            column(6,
                  h1("How to use the app?"),
                  # box to contain description
                  box(background = "yellow", width=12,
-                     h4("This application visulalizes some analyses with health dataset"),
-                     h4("There are two types of statistical methods, unsupervised and supervised method."),
-                     h4("Unsupervised model is ~~"),
-                     h4("Supervised moedel is ~~")
+                     h4("This application consists of four pages."),
+                     h4("The first page is data exloration. In this page, the user can create simple numerical and graphical summaries.
+                         The boxplot tab shows medical charges distribution by the variable which the user select for x-value.
+                         And scatterplot tab shows the relationship between age and charges with more variables if user want to see."),
+                     h4("The second page is unsupervised learning, there is no outcome measure, and the goal is to describe the associations 
+                         and patterns among a set of input measure. In this page, the user can do the principal components analysis."),
+                     h4("The third page is Supervised learnig, the goal is to predict the value of an outcome measure based on a number of 
+                         input measures. In first tab, the user can make a linear model to predict the medical cost(charges) and
+                         the second tab, user can try the random forest model."),
+                     h4("The last page is Data, user can scroll through the data and download."),
+                     a(strong("Visit the github page"), href="https://github.com/seasky4588/Project3")
+                     
                      ) # end box
                  ) # end column
-          
-         ) # end fluid Row 
+          ) # end fluid Row 
         ), # end tabItem
-      tabItem(tabName= "app",
+      
+      tabItem(tabName= "Start",
         fluidRow(
           column(3,
                 br(), 
-                box(width=12, title="Select indenpent value(x) for Box Plot",
+                box(background = "yellow", width=12, title=strong("Select independent value(x) for Box Plot"),
                     selectizeInput("x_col", "x_value", selected = "smoker", choices = c("sex","smoker","region"))
                  ), 
                 br(),
-                box(width=12, title="Select sex and region of policyholder for Scatter Plot and Data",
+                box(background = "yellow", width=12, title=strong("Select sex and region of policyholder for Scatter Plot"),
                     selectizeInput("sex", "Sex", selected = "female", choices = levels(as.factor(Data$sex)),multiple = TRUE),
                     selectizeInput("region", "Residential area", 
                                    selected = "southeast", choices = levels(as.factor(Data$region)), multiple = TRUE),
-                    br(),
                     sliderInput("size", "Size of Points on Scatter Plot",
                                 min = 1, max = 10, value = 5, step = 1),
-                    br(),
                     checkboxInput("smoke", h4("Seperate Smoking status", style = "color:blue;")), 
                     
                     # conditionalPanel 
@@ -74,29 +94,89 @@ dashboardPage(skin="blue",
                 ),
            column(9, 
                   tabsetPanel(
-                    tabPanel("data exploration",
+                    tabPanel(strong("BoxPlot"),
                         fluidRow(
                             column(12,
+                                  p(class = 'text-right', downloadButton('downPlot ', 'Download Plot')),
                                   plotOutput("boxPlot"),
                                   br(),
-                                  textOutput("info"),
-                                  br(),
-                                  plotOutput("Plot")
-                             ))), # end tab panel
-                    tabPanel("clustering", 
-                        fluidRow()), # end tab panel
-                    tabPanel("Modeling",
-                        fluidRow()), # end tab panel
-                    tabPanel("Data",
-                        fluidRow(
-                           column(12,
-                                  tableOutput("table"))
-                        )) # end tab panel
+                                  h4("Numerical Summary"),
+                                  textOutput("info"))
+                             )), # end tab panel
                     
+                    
+                    tabPanel(strong("Scatter Plot"), 
+                        fluidRow(
+                            column(12,
+                                  plotOutput("Plot"))
+                             )) # end tab panel
                   ) # end tabset Panel
                 ) # end column
              ) # end fluidRow  
-            ) # end tabItem    
+            ), # end tabItem 
+      
+      tabItem(tabName= "Clustering",
+              fluidRow(
+                column(3,
+                      br(),
+                      box()),
+                column(9
+                                              
+                       )
+              )
+            ), # end tabItem
+      
+      tabItem(tabName= "Modeling",
+              fluidRow(
+                column(3,
+                       br(),
+                       sliderInput("charge", "Range of Charges(Y)",
+                                   min = round(min(Data$charges),0), max = round(max(Data$charges),0), value = c(min, max)),
+                       box(background = "yellow", width=12, title=strong("Select the first parameter value for SLR"),
+                           selectizeInput("x1", "x1", selected = "age", choices = c("age","bmi","steps", "children"))
+                       ),
+                       box(background = "yellow", width=12, title=strong("Select the second parameter values for MLR"),
+                           selectizeInput("x2", "x2", selected = "age", choices = c("age","bmi","steps", "children", "smoker", "steps", "region", "sex"))
+                       ),
+                       box(background = "purple", width=12, title=strong("Predict the value"),
+                           numericInput("param1", "parameter", value=20)
+                       )
+                       
+                      ),
+                
+                
+                
+                column(9,
+                       h3("1.Simple Linear Regression Model(SLR)"),
+                       withMathJax(), helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + e$$')), 
+                       br(),
+                       plotOutput("slr"),
+                       br(),
+                       h4(strong("predict the medical charges with above model")),
+                       verbatimTextOutput("slrPred"),
+                       
+                       
+                       h3("2.Multiple Linear Regression Model(MLR)"),
+                       helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + \\beta_2*x_2 + \\beta_3*x_1*x_2 + e$$'))
+                       
+                       
+                       
+                       )
+              )
+      ), # end tabItem
+      
+      tabItem(tabName= "Data",
+              fluidRow(
+                column(12,
+                       p(class = 'text-right', downloadButton('downData', 'Download Data')),
+                       DT::dataTableOutput("table")
+                )
+              )
+              
+      ) # end tabItem
+      
+      
+      
           ) # end tabItems
       ) # end DashboardBody
     ) # end Dashborad Page
