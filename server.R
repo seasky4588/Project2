@@ -26,20 +26,41 @@ shinyServer(function(input, output, session) {
   
   
   #create plot
+  
+  
+  
+  output$boxPlot <- renderPlot({
+    
+    #create plot
+    
+    if(input$x_col=="sex"){
+      g1 <- ggplot(Data, aes(x=sex, y=charges))
+      g1 +geom_boxplot(aes(fill=sex))
+    } else if(input$x_col=="smoker") {
+      g1 <- ggplot(Data, aes(x=smoker, y=charges))
+      g1 +geom_boxplot(aes(fill=smoker))
+    } else {
+      g1 <- ggplot(Data, aes(x=region, y=charges))
+      g1 +geom_boxplot(aes(fill=region))
+    }
+  })
+    
+  
+  
   output$Plot <- renderPlot({
     
     #get filtered data
     newData <- getData()
     
     #create plot
-    g <- ggplot(newData, aes(x=age, y=lnCharges))
+    g2 <- ggplot(newData, aes(x=age, y=charges))
     
     if(input$smoke&input$steps){
-      g + geom_point(size=3, aes(col=steps))+facet_wrap(~smoker)
+      g2 + geom_point(size=3, aes(col=steps))+facet_wrap(~smoker)
     } else if(input$smoke) {
-      g + geom_point(size=3)+facet_wrap(~smoker, labeller = label_both)
+      g2 + geom_point(size=3)+facet_wrap(~smoker, labeller = label_both)
     } else {
-      g + geom_point(size = input$size)
+      g2 + geom_point(size = input$size)
     }
   })
   
@@ -55,13 +76,27 @@ shinyServer(function(input, output, session) {
   })
   
   
-  #create text info
+  #create numeric summaries
   output$info <- renderText({
     #get filtered data
     newData <- getData()
     
-    paste("The average individual medical costs billed by health insurance for", input$sex, " ", "in", " ", input$region," ", "is", round(mean(newData$charges, na.rm = TRUE), 2), sep = " ")
-  })
+    if(input$x_col=="sex"){
+      paste("The average individual medical costs billed by health insurance for female is ", round(Data%>%filter(sex=="female")%>%summarise(mean(charges, na.rm=TRUE)), 2), 
+            "and for male is ",round(Data%>%filter(sex=="male")%>%summarise(mean(charges, na.rm=TRUE)), 2), sep = " ")
+    }else if(input$x_col=="smoker"){paste("The average individual medical costs billed by health insurance for non-smoker is ", round(Data%>%filter(smoker=="no")%>%summarise(mean(charges, na.rm=TRUE)), 2), 
+                     "and for smoker is ",round(Data%>%filter(smoker=="yes")%>%summarise(mean(charges, na.rm=TRUE)), 2), sep = " ")
+    }else{ 
+      paste("The average individual medical costs billed by health insurance for northeast is ", 
+             round(Data%>%filter(region=="northeast")%>%summarise(mean(charges, na.rm=TRUE)), 2), 
+            ", for northwest is ",round(Data%>%filter(region=="northwest")%>%summarise(mean(charges, na.rm=TRUE)), 2), 
+            ", for southeast is ",round(Data%>%filter(region=="southeast")%>%summarise(mean(charges, na.rm=TRUE)), 2),
+            "and for southwest is ",round(Data%>%filter(region=="southwest")%>%summarise(mean(charges, na.rm=TRUE)), 2),
+            sep = " ")
+    }
+    
+    })
+    
   
   #create output of observations    
   output$table <- renderTable({
