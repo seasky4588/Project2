@@ -1,4 +1,5 @@
 
+
 library(shiny)
 library(ggplot2)
 library(shinydashboard)
@@ -9,7 +10,6 @@ Data <- read_csv("insurance.csv")
 Data$sex <- as.factor(Data$sex)
 Data$smoker <- as.factor(Data$smoker)
 Data$region <- as.factor(Data$region)
-
 
 
 dashboardPage(skin="blue",
