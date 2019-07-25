@@ -20,8 +20,8 @@ dashboardPage(skin="blue",
   dashboardSidebar(sidebarMenu(
     menuItem("About", tabName ="about", icon= icon("comment-dots")),
     menuItem("Data Exploration", tabName="Start", icon= icon("laptop")),
-    menuItem("Unsupervised Learning", tabName="Clustering", icon= icon("brain")),
-    menuItem("Supervised Learning", tabName="Modeling", icon= icon("chart-bar")),
+    menuItem("Unsupervised Learning", tabName="PCA", icon= icon("brain")),
+    menuItem("Modeling", tabName="Modeling", icon= icon("chart-bar")),
     menuItem("Data", tabName="Data", icon= icon("book"))
   )),
   
@@ -39,15 +39,15 @@ dashboardPage(skin="blue",
                 h1("About the Data"),
                 # box to contain description
                 box(background = "purple", width=12,
-                    h4("This data is a sample dataset of Medical Cost Personal in US."),
+                    h4("This data is a sample dataset of Personal Medical Cost(1,338 Observations) in US."),
                     h4("It includes nine informations which are age, sex, bmi, steps, childeren, smoker, region and charges,"),
                     h4("The intersted value is charges(reponse, y), individual medical costs billed by health insurance."),
                     h4("The purpose is making a prediction model with related variables."),
                     br(),
                     h4("[ Variables information ]"),
                     h5("- age : age of policyholder"),
-                    h5("- sex: gender of policy holder"), 
-                    h5("- bmi: Body mass index (kg / m^2)"),
+                    h5("- sex: gender of policyholder"), 
+                    h5("- bmi: body mass index (kg / m^2)"),
                     h5("- steps: average walking steps per day of policyholder"), 
                     h5("- children: number of children/dependents of policyholder"),
                     h5("- smoker: smoking state of policyholder (non-smoker=no, smoker=yes)"), 
@@ -63,14 +63,14 @@ dashboardPage(skin="blue",
                      h4("This application consists of four pages."),
                      h4("The first page is data exloration. In this page, the user can create simple numerical and graphical summaries.
                          The boxplot tab shows medical charges distribution by the variable which the user select for x-value.
-                         And scatterplot tab shows the relationship between age and charges with more variables if user want to see."),
+                         And scatterplot tab shows the relationship between age and charges with smoking and steps status if user selects."),
                      h4("The second page is unsupervised learning, there is no outcome measure, and the goal is to describe the associations 
-                         and patterns among a set of input measure. In this page, the user can do the principal components analysis."),
-                     h4("The third page is Supervised learnig, the goal is to predict the value of an outcome measure based on a number of 
-                         input measures. In first tab, the user can make a linear model to predict the medical cost(charges) and
-                         the second tab, user can try the random forest model."),
+                         and patterns among a set of input measure. In this page, the user can do the principal components analysis(PCA)."),
+                     h4("The third page is Modeling, the goal is to predict the value of an outcome measure based on a number of 
+                         input measures. In first tab, the user can make a simple linear regression(SLR) to predict the medical cost.
+                         The second tab, user can try multiple linear regression(MLR) by adding categorical parameter."),
                      h4("The last page is Data, user can scroll through the data and download."),
-                     a(strong("Visit the github page"), href="https://github.com/seasky4588/Project3")
+                     a(strong("If you want to see R code, visit the github page (click here)"), href="https://github.com/seasky4588/Project3")
                      
                      ) # end box
                  ) # end column
@@ -105,10 +105,11 @@ dashboardPage(skin="blue",
                     tabPanel(strong("BoxPlot"),
                         fluidRow(
                             column(12,
+                                  h4("1-1. The Box Plot:"),
                                   p(class = 'text-right', downloadButton('downPlot ', 'Download Plot')),
                                   plotOutput("boxPlot"),
                                   br(),
-                                  h4("Numerical Summary"),
+                                  h4("1-2. Numerical Summary:"),
                                   textOutput("info"))
                              )), # end tab panel
                     
@@ -116,20 +117,52 @@ dashboardPage(skin="blue",
                     tabPanel(strong("Scatter Plot"), 
                         fluidRow(
                             column(12,
-                                  plotOutput("Plot"))
+                                  h4("2-1. The Scatter Plot :"), 
+                                  plotOutput("Plot", click = "plot_click"),
+                                  br(),
+                                  h4("2-2. The region values where you click on the plot: "),
+                                  verbatimTextOutput("infoPlot")
+                                  )
+                            
                              )) # end tab panel
                   ) # end tabset Panel
                 ) # end column
              ) # end fluidRow  
             ), # end tabItem 
       
-      tabItem(tabName= "Clustering",
+      tabItem(tabName= "PCA",
               fluidRow(
-                column(3,
+                column(4,
                       br(),
-                      box()),
-                column(9
-                                              
+                      box(background = "purple", width=12, title=strong("Principle Components Analysis (PCA)"),
+                          h4("PCA is a dimension reduction technique."),
+                          h4("If you have p variables, they contain some joint variability/correlation."),
+                          h4("PCA looks for linear combinations of those p variables that account for most the variability."), 
+                          h4("Usually can represent variability of the p variables by m < p PCs.")
+                          ),
+                      box(background = "yellow", width=12, title=strong("Select independent values for PCA "),
+                          selectizeInput("PCs", "Variables", selected = "bmi", choices = c("bmi", "steps", "children"), multiple=TRUE))
+                      ),
+                column(8,
+                       tabsetPanel(
+                         tabPanel(strong("BiPlot"),
+                                  fluidRow(
+                                    column(12,
+                                           h4("1. PCA Biplot :"),
+                                           plotOutput("Biplot")), 
+                                           verbatimTextOutput("infoPCs")
+                                  )), # end tab panel
+                         
+                         
+                         tabPanel(strong("ScreePlot"), 
+                                  fluidRow(
+                                    column(12,
+                                           h4("2. PCA ScreePlot :"), 
+                                           plotOutput("Screeplot"))
+                                  )) # end tab panel
+                       ) # end tabset Panel
+
+
                        )
               )
             ), # end tabItem
@@ -138,8 +171,9 @@ dashboardPage(skin="blue",
               fluidRow(
                 column(3,
                        br(),
-                       sliderInput("charge", "Range of Charges(Y)",
-                                   min = round(min(Data$charges),0), max = round(max(Data$charges),0), value = c(min, max)),
+                       box(background = "yellow", width=12, title=strong("Select the range of Charges"),
+                           sliderInput("charge", "y",
+                                   min = round(min(Data$charges),0), max = round(max(Data$charges),0), value = c(min, max))),
                        box(background = "yellow", width=12, title=strong("Select the first parameter value"),
                            selectizeInput("x1", "x1", selected = "age", choices = c("age","bmi"))
                        ),
@@ -163,12 +197,12 @@ dashboardPage(skin="blue",
                          tabPanel(strong("SLR"),
                                   fluidRow(
                                     column(12,
-                                           h4("1.Simple Linear Regression Model:"),
+                                           h4("1-1. Simple Linear Regression Model:"),
                                            withMathJax(), helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + e$$')), 
                                            br(),
                                            plotOutput("slr"),
                                            br(),
-                                           h4(strong("predict the medical charges with above model")),
+                                           h4("1-2. Predict the medical charges with above model:"),
                                            textOutput("infoSlr"),
                                            verbatimTextOutput("slrPred"))
                                   )), # end tab panel
@@ -177,12 +211,12 @@ dashboardPage(skin="blue",
                          tabPanel(strong("MLR"), 
                                   fluidRow(
                                     column(12,
-                                           h4("2.Multiple Linear Regression Model:"),
+                                           h4("2-1. Multiple Linear Regression Model:"),
                                            helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + \\beta_2*x_2 + \\beta_3*x_1*x_2 + e$$')),
                                            br(),
                                            plotOutput("mlr"),
                                            br(),
-                                           h4(strong("predict the medical charges with above model")),
+                                           h4("2-2. Predict the medical charges with above model:"),
                                            textOutput("infoMlr"),
                                            verbatimTextOutput("mlrPred"))
                                   )) # end tab panel
@@ -199,6 +233,7 @@ dashboardPage(skin="blue",
       tabItem(tabName= "Data",
               fluidRow(
                 column(12,
+                       h4("1. Data Table: "),
                        p(class = 'text-right', downloadButton('downData', 'Download Data')),
                        DT::dataTableOutput("table")
                 )

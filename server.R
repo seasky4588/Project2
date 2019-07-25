@@ -121,10 +121,49 @@ shinyServer(function(input, output, session) {
     })
     
   
+  # create ability to click on plot
+  output$infoPlot <- renderText({
+    paste0("x=", input$plot_click$x, "\ny=", input$plot_click$y)
+  })
+  
+  
+  
+  
   
   ## Tab2
   
-  # Create the simple linear Regression
+  
+  
+  # PCA
+  
+  # Create Biplots
+  
+  
+  output$Biplot <- renderPlot({
+    
+    PCs <- prcomp(select(Data, age, input$PCs), scale=TRUE)
+
+    biplot(PCs, xlabs=rep(".", nrow(Data)), cex=1.5)
+
+  })
+  
+  
+  output$Screeplot <- renderPlot({
+    
+    PCs <- prcomp(select(Data, age, input$PCs), scale=TRUE)
+    
+    screeplot(PCs, type="lines")
+    
+  })
+
+  # PCs 
+  output$infoPCs <- renderPrint({
+    
+    PCs <- prcomp(select(Data, age, input$PCs), scale=TRUE)
+    
+    PCs
+    
+  })
   
   
   
@@ -137,6 +176,7 @@ shinyServer(function(input, output, session) {
   })
   
   
+  # Simple linear Regression
   
   output$slr <- renderPlot({
     
@@ -187,8 +227,6 @@ shinyServer(function(input, output, session) {
   paste("The average individual medical costs billed by health insurance with ", input$x1, " : ", sep = " ")
  
   })
-  
-  
   
   
   
