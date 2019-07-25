@@ -168,13 +168,113 @@ shinyServer(function(input, output, session) {
     newData2 <- getData2()
     
     
-    slr <- lm(charges ~ age, newData2)
-    summary(slr)
-    predict(slr, data.frame(age=input$param1))
+    if(input$x1=="age"){
+      slr <- lm(charges ~ age, newData2)
+      summary(slr)
+      predict(slr, data.frame(age=input$new_age))
+    } else{
+      slr <- lm(charges ~ bmi, newData2)
+      summary(slr)
+      predict(slr, data.frame(bmi=input$new_bmi))
+    }
     
+  })
+
+  
+  #create numeric summaries
+  output$infoSlr <- renderText({
+
+  paste("The average individual medical costs billed by health insurance with ", input$x1, " : ", sep = " ")
+ 
   })
   
   
+  
+  
+  
+  
+  # Mulitiple Linear Regression  
+  output$mlr <- renderPlot({
+    
+    #create plot
+    
+    #get filtered data
+    newData2 <- getData2()
+    
+    
+    if(input$x1=="age"){
+     if(input$x2=="smoker"){
+      g3 <- ggplot(newData2, aes(x=age, y=charges))
+      g3 + geom_point(aes(col=smoker)) + geom_smooth(method="lm", aes(col=smoker))
+     } else if(input$x2=="region") {
+      g3 <- ggplot(newData2, aes(x=age, y=charges))
+      g3 + geom_point(aes(col=region)) + geom_smooth(method="lm", aes(col=region))
+     } else{
+      g3 <- ggplot(newData2, aes(x=age, y=charges))
+      g3 + geom_point(aes(col=sex)) + geom_smooth(method="lm", aes(col=sex))
+      }
+     }else{
+      if(input$x2=="smoker"){
+        g3 <- ggplot(newData2, aes(x=bmi, y=charges))
+        g3 + geom_point(aes(col=smoker)) + geom_smooth(method="lm", aes(col=smoker))
+      } else if(input$x2=="region") {
+        g3 <- ggplot(newData2, aes(x=bmi, y=charges))
+        g3 + geom_point(aes(col=region)) + geom_smooth(method="lm", aes(col=region))
+      } else{
+        g3 <- ggplot(newData2, aes(x=bmi, y=charges))
+        g3 + geom_point(aes(col=sex)) + geom_smooth(method="lm", aes(col=sex))
+      }
+     }
+  })
+  
+  
+
+  output$mlrPred <- renderPrint({
+    
+    #get filtered data
+    newData2 <- getData2()
+    
+    
+    if(input$x1=="age"){
+      if(input$x2=="smoker"){
+        mlr <- lm(charges ~ age*smoker, newData2)
+        summary(mlr)
+        predict(mlr, data.frame(age=input$new_age, smoker=input$new_smoker))
+      } else if(input$x2=="region") {
+        mlr <- lm(charges ~ age*region, newData2)
+        summary(mlr)
+        predict(mlr, data.frame(age=input$new_age, region=input$new_region))
+      } else{
+        mlr <- lm(charges ~ age*sex, newData2)
+        summary(mlr)
+        predict(mlr, data.frame(age=input$new_age, sex=input$new_sex))
+      }
+    }else{
+      if(input$x2=="smoker"){
+        mlr <- lm(charges ~ bmi*smoker, newData2)
+        summary(mlr)
+        predict(mlr, data.frame(bmi=input$new_bmi, smoker=input$new_smoker))
+      } else if(input$x2=="region") {
+        mlr <- lm(charges ~ bmi*region, newData2)
+        summary(mlr)
+        predict(mlr, data.frame(bmi=input$new_bmi, region=input$new_region))
+      } else{
+        mlr <- lm(charges ~ bmi*sex, newData2)
+        summary(mlr)
+        predict(mlr, data.frame(bmi=input$new_bmi, sex=input$new_sex))
+      }
+    }
+  })
+  
+  
+  #create numeric summaries
+  output$infoMlr <- renderText({
+    
+    paste("The average individual medical costs billed by health insurance with ", input$x1, " and ", input$x2, " : ", sep = " ")
+    
+  })
+  
+      
   
   ## Tab4
   

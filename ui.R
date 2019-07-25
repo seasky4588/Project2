@@ -4,6 +4,14 @@ library(ggplot2)
 library(shinydashboard)
 
 
+# Read Data
+Data <- read_csv("insurance.csv")
+Data$sex <- as.factor(Data$sex)
+Data$smoker <- as.factor(Data$smoker)
+Data$region <- as.factor(Data$region)
+
+
+
 dashboardPage(skin="blue",
   # add title
   dashboardHeader(title ="Predictive Model for Medical Charges", titleWidth = 750),
@@ -132,14 +140,18 @@ dashboardPage(skin="blue",
                        br(),
                        sliderInput("charge", "Range of Charges(Y)",
                                    min = round(min(Data$charges),0), max = round(max(Data$charges),0), value = c(min, max)),
-                       box(background = "yellow", width=12, title=strong("Select the first parameter value for SLR"),
-                           selectizeInput("x1", "x1", selected = "age", choices = c("age","bmi","steps", "children"))
+                       box(background = "yellow", width=12, title=strong("Select the first parameter value"),
+                           selectizeInput("x1", "x1", selected = "age", choices = c("age","bmi"))
                        ),
-                       box(background = "yellow", width=12, title=strong("Select the second parameter values for MLR"),
-                           selectizeInput("x2", "x2", selected = "age", choices = c("age","bmi","steps", "children", "smoker", "steps", "region", "sex"))
+                       box(background = "yellow", width=12, title=strong("Select the second parameter value for MLR"),
+                           selectizeInput("x2", "x2", selected = "smoker", choices = c("region", "smoker", "sex"))
                        ),
-                       box(background = "purple", width=12, title=strong("Predict the value"),
-                           numericInput("param1", "parameter", value=20)
+                       box(background = "purple", width=12, title=strong("Put new parameter values for Prediction"),
+                           numericInput("new_age", "new_age", value=30),
+                           numericInput("new_bmi", "new_bmi", value=20),
+                           selectizeInput("new_region", "new_region", selected="southeast", choice=levels(as.factor(Data$region))),
+                           selectizeInput("new_smoker", "new_smoker", selected="no", choice=c("no", "yes")),
+                           selectizeInput("new_sex", "new_sex", selected="female", choice=c("female", "male"))
                        )
                        
                       ),
@@ -147,17 +159,36 @@ dashboardPage(skin="blue",
                 
                 
                 column(9,
-                       h3("1.Simple Linear Regression Model(SLR)"),
-                       withMathJax(), helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + e$$')), 
-                       br(),
-                       plotOutput("slr"),
-                       br(),
-                       h4(strong("predict the medical charges with above model")),
-                       verbatimTextOutput("slrPred"),
+                       tabsetPanel(
+                         tabPanel(strong("SLR"),
+                                  fluidRow(
+                                    column(12,
+                                           h4("1.Simple Linear Regression Model:"),
+                                           withMathJax(), helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + e$$')), 
+                                           br(),
+                                           plotOutput("slr"),
+                                           br(),
+                                           h4(strong("predict the medical charges with above model")),
+                                           textOutput("infoSlr"),
+                                           verbatimTextOutput("slrPred"))
+                                  )), # end tab panel
+                         
+                         
+                         tabPanel(strong("MLR"), 
+                                  fluidRow(
+                                    column(12,
+                                           h4("2.Multiple Linear Regression Model:"),
+                                           helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + \\beta_2*x_2 + \\beta_3*x_1*x_2 + e$$')),
+                                           br(),
+                                           plotOutput("mlr"),
+                                           br(),
+                                           h4(strong("predict the medical charges with above model")),
+                                           textOutput("infoMlr"),
+                                           verbatimTextOutput("mlrPred"))
+                                  )) # end tab panel
+                       ) # end tabset Panel
                        
                        
-                       h3("2.Multiple Linear Regression Model(MLR)"),
-                       helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + \\beta_2*x_2 + \\beta_3*x_1*x_2 + e$$'))
                        
                        
                        
