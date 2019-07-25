@@ -161,8 +161,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  
-  ## PAGE3 : Modeling, SLR, MLR
+## PAGE3 : Modeling, SLR, MLR
   
   # filter Data
   
