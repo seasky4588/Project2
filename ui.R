@@ -31,9 +31,6 @@ dashboardPage(skin="blue",
       # First tab content
       tabItem(tabName= "about",
         fluidRow(
-          # add in latex functionality if needed
-          withMathJax(),
-          
           # two columns for each of the two items
           column(6,
                 h1("About the Data"),
@@ -71,11 +68,10 @@ dashboardPage(skin="blue",
                          The second tab, user can try multiple linear regression(MLR) by adding categorical parameter."),
                      h4("The last page is Data, user can scroll through the data and download."),
                      a(strong("If you want to see R code, visit the github page (click here)"), href="https://github.com/seasky4588/Project3")
-                     
                      ) # end box
                  ) # end column
-          ) # end fluid Row 
-        ), # end tabItem
+                ) # end fluid Row 
+              ), # end tabItem
       
       tabItem(tabName= "Start",
         fluidRow(
@@ -99,7 +95,7 @@ dashboardPage(skin="blue",
                                                                style = "color:red;")))
                     )
                   
-                ),
+                  ), #end column
            column(9, 
                   tabsetPanel(
                     tabPanel(strong("BoxPlot"),
@@ -112,8 +108,6 @@ dashboardPage(skin="blue",
                                   h4("1-2. Numerical Summary:"),
                                   textOutput("info"))
                              )), # end tab panel
-                    
-                    
                     tabPanel(strong("Scatter Plot"), 
                         fluidRow(
                             column(12,
@@ -121,14 +115,12 @@ dashboardPage(skin="blue",
                                   plotOutput("Plot", click = "plot_click"),
                                   br(),
                                   h4("2-2. The region values where you click on the plot: "),
-                                  verbatimTextOutput("infoPlot")
-                                  )
-                            
-                             )) # end tab panel
-                  ) # end tabset Panel
-                ) # end column
-             ) # end fluidRow  
-            ), # end tabItem 
+                                  verbatimTextOutput("infoPlot"))
+                            )) # end tab panel
+                          ) # end tabset Panel
+                 ) # end column
+                ) # end fluidRow  
+              ), # end tabItem 
       
       tabItem(tabName= "PCA",
               fluidRow(
@@ -152,20 +144,16 @@ dashboardPage(skin="blue",
                                            plotOutput("Biplot")), 
                                            verbatimTextOutput("infoPCs")
                                   )), # end tab panel
-                         
-                         
                          tabPanel(strong("ScreePlot"), 
                                   fluidRow(
                                     column(12,
                                            h4("2. PCA ScreePlot :"), 
                                            plotOutput("Screeplot"))
-                                  )) # end tab panel
-                       ) # end tabset Panel
-
-
-                       )
-              )
-            ), # end tabItem
+                                )) # end tab panel
+                             ) # end tabset Panel
+                     ) # end column
+                   ) # end fluidRow
+              ), # end tabItem
       
       tabItem(tabName= "Modeling",
               fluidRow(
@@ -187,18 +175,14 @@ dashboardPage(skin="blue",
                            selectizeInput("new_smoker", "new_smoker", selected="no", choice=c("no", "yes")),
                            selectizeInput("new_sex", "new_sex", selected="female", choice=c("female", "male"))
                        )
-                       
-                      ),
-                
-                
-                
+                      ), # end column
                 column(9,
                        tabsetPanel(
                          tabPanel(strong("SLR"),
                                   fluidRow(
                                     column(12,
                                            h4("1-1. Simple Linear Regression Model:"),
-                                           withMathJax(), helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + e$$')), 
+                                           withMathJax(), helpText(h3('$$y = \\beta_0 + \\beta_1*x_1 + e$$')), ## add in latex functionality
                                            br(),
                                            plotOutput("slr"),
                                            br(),
@@ -220,15 +204,10 @@ dashboardPage(skin="blue",
                                            textOutput("infoMlr"),
                                            verbatimTextOutput("mlrPred"))
                                   )) # end tab panel
-                       ) # end tabset Panel
-                       
-                       
-                       
-                       
-                       
-                       )
-              )
-      ), # end tabItem
+                               ) # end tabset Panel
+                    ) # end column
+                   ) # end fluidRow
+              ), # end tabItem
       
       tabItem(tabName= "Data",
               fluidRow(
@@ -236,12 +215,9 @@ dashboardPage(skin="blue",
                        h4("1. Data Table: "),
                        p(class = 'text-right', downloadButton('downData', 'Download Data')),
                        DT::dataTableOutput("table")
-                )
-              )
-              
-      ) # end tabItem
-      
-      
+                       ) # end column
+                      ) # end fluidRow
+               ) # end tabItem
       
           ) # end tabItems
       ) # end DashboardBody

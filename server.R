@@ -17,7 +17,7 @@ Data$region <- as.factor(Data$region)
 shinyServer(function(input, output, session) {
   
   
-  ## Tab1
+## PAGE1 : Data Exploration
   
   # create boxplot 
   
@@ -73,6 +73,7 @@ shinyServer(function(input, output, session) {
   
   
   # create scatter plot
+  
   output$Plot <- renderPlot({
     
     #get filtered data
@@ -91,7 +92,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  # update the sliderInput
+  # update the sliderInput point size
   observe({
     if(input$steps){
       updateSliderInput(session, "size", min=3)
@@ -127,17 +128,9 @@ shinyServer(function(input, output, session) {
   })
   
   
-  
-  
-  
-  ## Tab2
-  
-  
-  
-  # PCA
+ ## PAGE2 : Unsupervised Learning, PCA
   
   # Create Biplots
-  
   
   output$Biplot <- renderPlot({
     
@@ -147,6 +140,7 @@ shinyServer(function(input, output, session) {
 
   })
   
+  # Create Screeplots
   
   output$Screeplot <- renderPlot({
     
@@ -156,7 +150,8 @@ shinyServer(function(input, output, session) {
     
   })
 
-  # PCs 
+  # Create PCs summary 
+  
   output$infoPCs <- renderPrint({
     
     PCs <- prcomp(select(Data, age, input$PCs), scale=TRUE)
@@ -167,7 +162,7 @@ shinyServer(function(input, output, session) {
   
   
   
-  ## Tab3
+  ## PAGE3 : Modeling, SLR, MLR
   
   # filter Data
   
@@ -202,6 +197,8 @@ shinyServer(function(input, output, session) {
        
   })
   
+  # SLR predict value
+  
   output$slrPred <- renderPrint({
     
     #get filtered data
@@ -223,16 +220,13 @@ shinyServer(function(input, output, session) {
   
   #create numeric summaries
   output$infoSlr <- renderText({
-
   paste("The average individual medical costs billed by health insurance with ", input$x1, " : ", sep = " ")
- 
   })
   
   
-  
-  
   # Mulitiple Linear Regression  
-  output$mlr <- renderPlot({
+
+    output$mlr <- renderPlot({
     
     #create plot
     
@@ -265,9 +259,9 @@ shinyServer(function(input, output, session) {
      }
   })
   
-  
-
-  output$mlrPred <- renderPrint({
+   # MLR predict value
+   
+    output$mlrPred <- renderPrint({
     
     #get filtered data
     newData2 <- getData2()
@@ -307,19 +301,16 @@ shinyServer(function(input, output, session) {
   
   #create numeric summaries
   output$infoMlr <- renderText({
-    
-    paste("The average individual medical costs billed by health insurance with ", input$x1, " and ", input$x2, " : ", sep = " ")
-    
+     paste("The average individual medical costs billed by health insurance with ", input$x1, " and ", input$x2, " : ", sep = " ")
   })
   
       
   
-  ## Tab4
+  ## PAGE4 : DATA
   
   #create output of observations    
   output$table <- renderDT({
     datatable(Data)
-
   })
   
   # download the filtered data
@@ -332,6 +323,4 @@ shinyServer(function(input, output, session) {
   })
   
   
-
-  
-})
+}) # end shiny server
