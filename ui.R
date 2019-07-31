@@ -49,7 +49,8 @@ dashboardPage(skin="blue",
                     h5("- children: number of children/dependents of policyholder"),
                     h5("- smoker: smoking state of policyholder (non-smoker=no, smoker=yes)"), 
                     h5("- region: the residential area of policyholder in the US"),
-                    h5("- charges: individual medical costs billed by health insurance")
+                    h5("- charges: individual medical costs billed by health insurance"),
+                    a(strong("This data set was found from Kaggle (click here) "), href="https://www.kaggle.com/datasets")
                         
                     ) # end box
                  ), # end column
